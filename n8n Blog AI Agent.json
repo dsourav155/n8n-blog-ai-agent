@@ -1,0 +1,193 @@
+{
+  "name": "n8n Blog AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d41a3236-1332-4ebb-8110-d5ab452ce0ed",
+      "name": "When chat message received",
+      "webhookId": "a1ecd8b1-2161-4b8a-b4ac-c4ea99e4e672"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        260,
+        220
+      ],
+      "id": "ad32a485-cbc9-4764-a043-ba94dad613c9",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "jxjEFJbCaHySVPqO",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a writer that writes high ranking SEO blog titles. The title should exceed no more than 8 words. DO NOT PUT QUOTATION AROUND THE TITLE\n\n\nCreate only 1 title"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "913416c3-0c9d-43f3-adb0-8f327ca33913",
+      "name": "Title Agent"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        620,
+        220
+      ],
+      "id": "aad11ece-6b24-40f5-9751-4fd1c00198c4",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "jxjEFJbCaHySVPqO",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "siteId": "67bc47ae7b90574768d13f87",
+        "collectionId": "67bc47af7b90574768d145bc",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('Title Agent').item.json.output }}"
+            },
+            {
+              "fieldId": "post-body",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.webflow",
+      "typeVersion": 2,
+      "position": [
+        940,
+        0
+      ],
+      "id": "9974e8b6-03e9-4d85-b7f1-39ac6139e788",
+      "name": "Webflow",
+      "credentials": {
+        "webflowOAuth2Api": {
+          "id": "71xXnWbAZjG6d2qO",
+          "name": "Webflow account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a blog about:  {{ $json.output }}",
+        "options": {
+          "systemMessage": "=As a professional journalist specializing in artificial intelligence and DevOps, you are tasked with creating a blog posts centered on AI and DevOps technologies, including automation, AI chatbots and their impact on businesses. Your articles should eplore how bussinesses can leverage AI and DevOps efficiency with a perticular focus on how AI automation can enhance operational effciency. Each post must be unique, with atleast 1000 to 1500 words and should be optimized for search engines to boost visibility for our company website.\n\nIt should cater to business owners interested in integrating AI and DeDevOps into their operations and should also appeal to AI automation agency owners by providing strategies insights into expanding their bussinesses through AI and DevOps innovation. The ultimate objective is to make our company a go-to resource for business owners and agency leaders looking to capatalize on AI and DevOps technologies. Your writing should be informative and engaging, with example and real-world scenarios, designed to drive traffic to our site and position our company as a thought leader in the AI and DevOps space\n\n\nIMPORTANT: ONLY USE HTML LANGUAGE TO CREATE THE BLOG.\nDO NOT IMPORT OR INSERT THE IMAGES\nDO NOT WRITE ANY CSS\n\nDO NOT WRITE ANYTHING EXCEPT FOR THE BLOG\n{{ $json.output }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        580,
+        0
+      ],
+      "id": "6a1ab5e9-0c5d-4067-921d-12ec70f12274",
+      "name": "Blog Body Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Title Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Title Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Title Agent": {
+      "main": [
+        [
+          {
+            "node": "Blog Body Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Blog Body Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blog Body Agent": {
+      "main": [
+        [
+          {
+            "node": "Webflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e3521a7b-4c65-455e-9b30-b528c5af2fdf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1da700dfc8ec33e190ff9d77d4010c54c067dba1d3eeed89362c9314af447da1"
+  },
+  "id": "2pf5N8TtfvxgfHW8",
+  "tags": []
+}
